@@ -1,6 +1,6 @@
-# Sons of the forest NPC Virginia and Kelvin Spawner
-- English: A small script written in Powershell for easy insert more Kelvin or/and Virginia in your savegame
-- German: Ein kleines, in Powershell geschriebenes Skript zur einfachen vervielfältigung von Kelvin oder/und Virginia
+# Sons of the forest toolbox
+- English: A small script written in Powershell for easy revive/insert more Kelvin or/and Virginia in your savegame + Take you inventory with you
+- German: Ein kleines, in Powershell geschriebenes Skript zur einfachen wiederbelebung/vervielfältigung von Kelvin oder/und Virginia + Mitnahme des Inventory zu anderen Spielständen
 
 # Support & Feedback
 - English: If you like the tool or have feedback, you can join my Discord at https://sirbash.com.
@@ -34,10 +34,6 @@
 - Close the game or quit it completely.
 - Locate the place on your computer where you downloaded the "init.cmd" file.
 - Double-click the "init.cmd" file to run it.
-- Enter the amount you want to add to your savegame
-- Wait until the script is executed and the message "savegame modified" appears on the screen.
-- Reopen Sons of the Forest and load the last saved game.
-- Go to the strand
 
 ## German: Nutzung des Skripts
 - Starten Sie Sons of the Forest.
@@ -45,11 +41,3 @@
 - Schließen Sie das Spiel oder beenden Sie es vollständig.
 - Suchen Sie den Ort auf Ihrem Computer, an dem Sie die Datei "init.cmd" heruntergeladen haben.
 - Doppelklicken Sie auf die Datei "init.cmd", um sie auszuführen.
-- Definieren Sie die Anzahl der NPCs
-- Warten Sie, bis das Skript ausgeführt wurde und auf dem Bildschirm die Meldung "savegame modified" erscheint.
-- Öffnen Sie Sons of the Forest erneut und laden Sie das zuletzt gespeicherte Spiel.
-- Gehe zum Strand
-
-# UPDATE
-- English: If you want to use this script at the forest spawn then just rename "engine.ps1" to "engine-strand.ps1" and "engine-forest.ps1" to "engine.ps1".
-- German: Wenn Sie dieses Skript beim Wald-Spawn verwenden möchten, benennen Sie einfach "engine.ps1" in "engine-strand.ps1" und "engine-forest.ps1" in "engine.ps1" um.
