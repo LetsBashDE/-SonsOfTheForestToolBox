@@ -300,7 +300,7 @@ function copyNPCs {
     {
         $maxUniqueId++
         $find = '[\\]["]Actors[\\]["][:][\[]'
-        $replace = '\"Actors\":[{\"UniqueId\":'+$maxUniqueId+',\"TypeId\":10,\"FamilyId\":0,\"Position\":'+$postion+',\"Rotation\":{\"x\":0.0,\"y\":-0.9923399,\"z\":0.0,\"w\":0.123537354},\"SpawnerId\":-1797797444,\"ActorSeed\":787901937,\"VariationId\":0,\"State\":2,\"GraphMask\":1,\"EquippedItems\":null,\"OutfitId\":-1,\"NextGiftTime\":0.0,\"LastVisitTime\":0.0,\"Stats\":{\"Health\":999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":100,\"Hydration\":100,\"Energy\":90.5,\"Affection\":999.0},\"StateFlags\":0},'
+        $replace = '\"Actors\":[{\"UniqueId\":'+$maxUniqueId+',\"TypeId\":10,\"FamilyId\":0,\"Position\":'+$postion+',\"Rotation\":{\"x\":0.0,\"y\":-0.9923399,\"z\":0.0,\"w\":0.123537354},\"SpawnerId\":-1797797444,\"ActorSeed\":787901937,\"VariationId\":0,\"State\":2,\"GraphMask\":1,\"EquippedItems\":[529,355,358],\"OutfitId\":-1,\"NextGiftTime\":0.0,\"LastVisitTime\":0.0,\"Stats\":{\"Health\":999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":100,\"Hydration\":100,\"Energy\":90.5,\"Affection\":999.0},\"StateFlags\":0},'
         $content = $content -replace $find, $replace
         write-host "." -NoNewline
     }
@@ -389,7 +389,7 @@ function tameNPCs
             $newNPC = $oldNPC -replace '[\\]["]State[\\]["]:[0-9]{1,2}[,]','\"State\":2,'
             $newNPC = $newNPC -replace '[\\]["]LastVisitTime[\\]["]:[^,]*[,]','\"LastVisitTime\":1,'
             $newNPC = $newNPC -replace '[\\]["]NextGiftTime[\\]["]:[^,]*[,]','\"NextGiftTime\":11,'
-            $newNPC = $newNPC -replace '[\\]["]EquippedItems[\\]["]:[^,]*[,]','\"EquippedItems\":[529],'
+            $newNPC = $newNPC -replace '[\\]["]EquippedItems[\\]["]:[^\\]*','\"EquippedItems\":[529,355,358],'
             $newNPC = $newNPC -replace '[\\]["]VariationId[\\]["]:[0-9]{1,2}[,]','\"VariationId\":1,'
             $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":90.0,\"Hydration\":50.0,\"Energy\":90.5,\"Affection\":99.9733},'
             $content = $content -replace [regex]::escape($oldNPC), $newNPC
@@ -478,7 +478,7 @@ function showMenu
     write-host "1. Insert your inventory (PlayerInventorySaveData.json must be in script folder)"
     write-host "2. Revive your NPCs (All of them)"
     write-host "3. Insert additional Virginas and Kelvins to your game"
-    write-host "4. Tame all Virginas"
+    write-host "4. Tame and weaponize all Virginas"
 
     $choice = 0
     while ($choice -le 0 -or $choice -gt 4)
