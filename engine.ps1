@@ -108,7 +108,7 @@ function reviveNPCs {
         foreach($oldNPC in $NPCs)
         {
             $newNPC = $oldNPC -replace '[\\]["]State[\\]["]:[0-9]{1,2}[,]','\"State\":2,'
-            $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":999,\"Anger\":60.25404,\"Fear\":99.97499,\"Fullness\":6.249775,\"Hydration\":0.0,\"Energy\":90.5,\"Affection\":0.0},'
+            $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":9999,\"Anger\":60.25404,\"Fear\":99.97499,\"Fullness\":6.249775,\"Hydration\":0.0,\"Energy\":90.5,\"Affection\":0.0},'
             $content = $content -replace [regex]::escape($oldNPC), $newNPC
         }
         write-host ($SaveDataPath + " type id 9 (Kelvin) is modified") -ForegroundColor green -BackgroundColor Black
@@ -120,7 +120,7 @@ function reviveNPCs {
         foreach($oldNPC in $NPCs)
         {
             $newNPC = $oldNPC -replace '[\\]["]State[\\]["]:[0-9]{1,2}[,]','\"State\":2,'
-            $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":0.0,\"Hydration\":0.0,\"Energy\":90.5,\"Affection\":100.0},'
+            $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":9999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":0.0,\"Hydration\":0.0,\"Energy\":90.5,\"Affection\":100.0},'
             $content = $content -replace [regex]::escape($oldNPC), $newNPC
         }
         write-host ($SaveDataPath + " type id 10 (Virginia) is modified") -ForegroundColor green -BackgroundColor Black
@@ -328,6 +328,100 @@ function copyNPCs {
     return $true
 }
 
+function tameNPCs
+{
+    param(
+        [string]$lastestpath
+    )
+    $SaveDataPath = ($lastestpath + "\SaveData.json")
+    $content = getSavegame $SaveDataPath
+    $original = $content 
+
+    if ($content -like '*,\"TypeId\":10,*') {
+        $NPCpattern = '[{][\\]["]UniqueId[\\]["][:][0-9]*[,][\\]["]TypeId[\\]["][:]10[,][^\}]*[}][^\}]*[}][^\}]*[}][,][\\]["]StateFlags[\\]["][:][0-9]{1,4}[}]';
+        $NPCs = [regex]::Matches($content, $NPCpattern)
+        foreach($oldNPC in $NPCs)
+        {
+            # Check if unique ID can be extracted
+            if (!($oldNPC -like '*,*' -and $oldNPC -like '{\"UniqueId\":*'))
+            {
+                continue
+            }
+            
+            # Extract unique ID
+            $uniqueID = [int](($oldNPC -split ',')[0] -replace '[{][\\]["]UniqueId[\\]["][:]','')
+            
+            # Validate unique ID
+            if(!($uniqueID -gt 0))
+            {
+                continue
+            }
+
+            # Update influence
+            $influenceUpdate = '{\"UniqueId\":'+$uniqueID+',\"Influences\":[{\"TypeId\":\"Player\",\"Sentiment\":100,\"Anger\":0.0,\"Fear\":0.0},{\"TypeId\":\"Cannibal\",\"Sentiment\":0.0,\"Anger\":8.0,\"Fear\":35.0}]},'
+            if ($content -like ('*{\"UniqueId\":'+$uniqueID+',\"Influences\":*'))
+            {
+                $influencePattern = '[{][\\]["]UniqueId[\\]["][:]'+$uniqueID+'[,][\\]["]Influences[\\]["][:][\[][^\]]*[\]][}][,]'
+                $content = $content -replace $influencePattern,$influenceUpdate
+            }
+            else 
+            {
+                # Insert new influence
+                $influencePattern = '[\\]["]InfluenceMemory[\\]["][:][\[]'
+                $content = $content -replace $influencePattern,('\"InfluenceMemory\":['+$influenceUpdate)
+            }
+
+            # Update event
+            #$eventUpdate = '{\"UniqueId\":'+$uniqueID+',\"Events\":[{\"Count\":0,\"Time\":0.0},{\"Count\":4,\"Time\":512.485046},{\"Count\":16,\"Time\":512.499634},{\"Count\":0,\"Time\":0.0},{\"Count\":11,\"Time\":516.4842},{\"Count\":0,\"Time\":0.0},{\"Count\":18,\"Time\":519.5603},{\"Count\":22,\"Time\":440.9344},{\"Count\":250,\"Time\":521.5445},{\"Count\":142,\"Time\":536.180237},{\"Count\":1,\"Time\":17.9985332},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":441.1082},{\"Count\":168,\"Time\":516.5881},{\"Count\":0,\"Time\":0.0},{\"Count\":13,\"Time\":442.068573},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":17.6253281},{\"Count\":3,\"Time\":222.579163}]},'
+            $eventUpdate = '{\"UniqueId\":'+$uniqueID+',\"Events\":[{\"Count\":0,\"Time\":0.0},{\"Count\":6000,\"Time\":1},{\"Count\":100,\"Time\":2},{\"Count\":100,\"Time\":3},{\"Count\":100,\"Time\":4},{\"Count\":0,\"Time\":0.0},{\"Count\":100,\"Time\":5},{\"Count\":22,\"Time\":6},{\"Count\":250,\"Time\":7},{\"Count\":142,\"Time\":8},{\"Count\":1,\"Time\":9},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":10},{\"Count\":168,\"Time\":11},{\"Count\":0,\"Time\":0.0},{\"Count\":13,\"Time\":12},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":14},{\"Count\":3,\"Time\":0.15}]},'
+            if ($content -like ('*{\"UniqueId\":'+$uniqueID+',\"Events\":*'))
+            {
+                $eventPattern = '[{][\\]["]UniqueId[\\]["][:]'+$uniqueID+'[,][\\]["]Events[\\]["][:][\[][^\]]*[\]][}][,]'
+                $content = $content -replace $eventPattern,$eventUpdate
+            }
+            else 
+            {
+                # Insert new event
+                $eventPattern = '[\\]["]EventMemory[\\]["][:][\[]'
+                $content = $content -replace $eventPattern,('\"EventMemory\":['+$eventUpdate)
+            }
+
+            $newNPC = $oldNPC -replace '[\\]["]State[\\]["]:[0-9]{1,2}[,]','\"State\":2,'
+            $newNPC = $newNPC -replace '[\\]["]LastVisitTime[\\]["]:[^,]*[,]','\"LastVisitTime\":1,'
+            $newNPC = $newNPC -replace '[\\]["]NextGiftTime[\\]["]:[^,]*[,]','\"NextGiftTime\":11,'
+            $newNPC = $newNPC -replace '[\\]["]EquippedItems[\\]["]:[^,]*[,]','\"EquippedItems\":[529],'
+            $newNPC = $newNPC -replace '[\\]["]VariationId[\\]["]:[0-9]{1,2}[,]','\"VariationId\":1,'
+            $newNPC = $newNPC -replace '[\\]["]Stats[\\]["]:[{][^}]*[}],','\"Stats\":{\"Health\":999.0,\"Anger\":0.0,\"Fear\":0.0,\"Fullness\":90.0,\"Hydration\":50.0,\"Energy\":90.5,\"Affection\":99.9733},'
+            $content = $content -replace [regex]::escape($oldNPC), $newNPC
+
+            # Event examples
+            #{\"UniqueId\":873,\"Events\":[{\"Count\":0,\"Time\":0.0},{\"Count\":4,\"Time\":512.485046},{\"Count\":16,\"Time\":512.499634},{\"Count\":0,\"Time\":0.0},{\"Count\":11,\"Time\":516.4842},{\"Count\":0,\"Time\":0.0},{\"Count\":18,\"Time\":519.5603},{\"Count\":22,\"Time\":440.9344},{\"Count\":250,\"Time\":521.5445},{\"Count\":142,\"Time\":536.180237},{\"Count\":1,\"Time\":17.9985332},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":441.1082},{\"Count\":168,\"Time\":516.5881},{\"Count\":0,\"Time\":0.0},{\"Count\":13,\"Time\":442.068573},{\"Count\":0,\"Time\":0.0},{\"Count\":1,\"Time\":17.6253281},{\"Count\":3,\"Time\":222.579163}]}
+            # \"EventMemory\":[
+
+            # Influence examples
+            # \"InfluenceMemory\":[
+            # {\"UniqueId\":2147140407,\"Influences\":[{\"TypeId\":\"Player\",\"Sentiment\":0.0386166461,\"Anger\":0.0,\"Fear\":29.9227657},{\"TypeId\":\"Cannibal\",\"Sentiment\":0.0,\"Anger\":8.0,\"Fear\":35.0}]}
+        }
+        write-host ($SaveDataPath + " type id 10 (Virginia) is modified") -ForegroundColor green -BackgroundColor Black
+    }
+
+    if ($original -ne $content) {
+        if (writeSavegame $SaveDataPath $content) {
+            write-host ($SaveDataPath + " savegame modified") -ForegroundColor green -BackgroundColor Black
+        }
+        else {
+            write-host ($SaveDataPath + " could not write to savegame") -ForegroundColor yellow -BackgroundColor Black
+            return $false
+        }
+    }
+    else {
+        write-host ($SaveDataPath + " savegame does not need modification") -ForegroundColor yellow -BackgroundColor Black
+        return $false
+    }
+
+    return $true
+}
+
 function copyInventory
 {
     param(
@@ -384,11 +478,12 @@ function showMenu
     write-host "1. Insert your inventory (PlayerInventorySaveData.json must be in script folder)"
     write-host "2. Revive your NPCs (All of them)"
     write-host "3. Insert additional Virginas and Kelvins to your game"
+    write-host "4. Tame all Virginas"
 
     $choice = 0
-    while ($choice -le 0 -or $choice -gt 3)
+    while ($choice -le 0 -or $choice -gt 4)
     {
-        $choice = read-host "Enter number (1-3)"
+        $choice = read-host "Enter number (1-4)"
     }
     return $choice
 }
@@ -418,8 +513,15 @@ function initHelper
         $result      = copyNPCs $lastestpath
     }
     
+    # Tame Virginia
+    if($choice -eq 4)
+    {
+        $lastestpath = retriveLatestSavegame "Multiplayer,SinglePlayer"
+        $result      = tameNPCs $lastestpath
+    }
+
     return $result
 }
 
 $result = initHelper
-$result
+#$result
