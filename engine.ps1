@@ -441,6 +441,49 @@ function copyInventory
     write-host "Check out your inventory" -ForegroundColor green -BackgroundColor Black
 }
 
+function resetTrees
+{
+    param(
+        [string]$lastestpath
+    )
+
+    # Retrive savegame data
+    $SaveDataPath = ($lastestpath + "\WorldObjectLocatorManagerSaveData.json")
+    $content = getSavegame $SaveDataPath
+    $original = $content
+
+    # Ask user what to do
+    write-host ""
+    $resetAny = read-host -Prompt "Do you want to reset ALL trees (also without a stump) [y = yes]"
+
+    # Prepare regex
+    $treePattern = '[\{][\\][\"]Key[\\][\"][\:][\\][\"][0-9A-Za-z]*[\\][\"][\,][\\][\"]Value[\\][\"][\:]3[\}][\,]'
+    if($resetAny -eq 'y')
+    {
+        $treePattern = '[\{][\\][\"]Key[\\][\"][\:][\\][\"][0-9A-Za-z]*[\\][\"][\,][\\][\"]Value[\\][\"][\:](1|3)[\}][\,]'
+    }
+
+    # Remove content
+    $content = $content -replace $treePattern,''
+
+    # Save
+    if ($original -ne $content) {
+        if (writeSavegame $SaveDataPath $content) {
+            write-host ($SaveDataPath + " savegame modified") -ForegroundColor green -BackgroundColor Black
+        }
+        else {
+            write-host ($SaveDataPath + " could not write to savegame") -ForegroundColor yellow -BackgroundColor Black
+            return $false
+        }
+    }
+    else {
+        write-host ($SaveDataPath + " savegame does not need modification") -ForegroundColor yellow -BackgroundColor Black
+        return $false
+    }
+
+    return $true
+}
+
 function getSavegame {
     param(
         [string]$filepath
@@ -479,11 +522,12 @@ function showMenu
     write-host "2. Revive your NPCs (All of them)"
     write-host "3. Insert additional Virginas and Kelvins to your game"
     write-host "4. Tame and weaponize all Virginas"
+    write-host "5. Respawn trees"
 
     $choice = 0
-    while ($choice -le 0 -or $choice -gt 4)
+    while ($choice -le 0 -or $choice -gt 5)
     {
-        $choice = read-host "Enter number (1-4)"
+        $choice = read-host "Enter number (1-5)"
     }
     return $choice
 }
@@ -518,6 +562,13 @@ function initHelper
     {
         $lastestpath = retriveLatestSavegame "Multiplayer,SinglePlayer"
         $result      = tameNPCs $lastestpath
+    }
+
+    # Reset trees
+    if($choice -eq 5)
+    {
+        $lastestpath = retriveLatestSavegame "Multiplayer,SinglePlayer"
+        $result      = resetTrees $lastestpath
     }
 
     return $result
