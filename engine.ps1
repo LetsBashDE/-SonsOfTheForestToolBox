@@ -17,6 +17,12 @@ function retriveLatestSavegame {
             $savegamefolders = Get-ChildItem -path $savegamepath
             foreach ($savegamefolder in $savegamefolders) {
                 $filepath = ($savegamefolder.fullname + "\SaveData.json")
+                if (!(test-path -Path $filepath)) {
+                    continue
+                }
+                if($filepath -like "*.zip*"){
+                    continue
+                }
                 $savegame = get-item -path $filepath
                 $modifiedtime = $savegame.LastWriteTime
     
